@@ -34,6 +34,7 @@ Scripts for processing CTX and HiRISE data are organized into their own subdirec
 
 ## Referencing This Workflow ##
 Please cite the following LPSC abstract in any publications that make use of this work or derivatives thereof:
-Mayer, D.P. and Kite, E.S., "An Integrated Workflow for Producing Digital Terrain Models of Mars from CTX and HiRISE Stereo Data Using the NASA Ames Stereo Pipeline," (2016) LPSC XLVII, Abtr. #1241.
+Mayer, D.P. and Kite, E.S., "An Integrated Workflow for Producing Digital Terrain Models of Mars from CTX and HiRISE Stereo Data Using the NASA Ames Stereo Pipeline," (2016) LPSC XLVII, Abtr. #1241. <http://www.hou.usra.edu/meetings/lpsc2016/pdf/1241.pdf>
+E-poster: <http://www.lpi.usra.edu/meetings/lpsc2016/eposter/1241.pdf>
 
 The Ames Stereo Pipeline itself should be cited according to guidelines in the official ASP documentation.

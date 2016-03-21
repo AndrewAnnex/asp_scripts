@@ -1,7 +1,7 @@
 # UChicago ASP Scripts #
 This Git repository consolidates a collection of Bash scripts that have been developed as part of a highly-automated workflow for generating digital terrain models (DTMs) from CTX and HiRISE stereo image data using the NASA Ames Stereo Pipeline (ASP).
 
-Most of these Bash scripts are wrappers for the various USGS ISIS3 and ASP binaries used to generate DTMs from stereo image data. The repository also contains a series of SBATCH scripts (Bash scrips with the *.sbatch* extension), which are used to start jobs on the UChicago Midway high-performance computing nodes.  Although these scripts have been developed for use with UChicago computing infrastructure, they are included here as examples that can be used by anyone who manages compute jobs using SLURM.  See the comments in individual Bash scripts for details on modifying them for use with another job manager (i.e. PBS) or for use on a single machine.
+Most of these Bash scripts are wrappers for the various USGS ISIS3 and ASP binaries used to generate DTMs from stereo image data. These scripts were developed to be run in a high-performance computing environment using the SLURM job manager. As such, many of the scripts contain calls to *scontrol* in order to generate a file containing a list of compute nodes for *parallel_stereo* to use. See the comments in individual Bash scripts for details on modifying them for use with another job manager (i.e. PBS) or for use on a single machine.
 
 ## Dependencies ##
 - USGS ISIS3 <https://isis.astrogeology.usgs.gov/>

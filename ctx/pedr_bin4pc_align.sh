@@ -16,24 +16,16 @@
 #
 #      The user must also have a copy of at least a subset of the PEDR binary files whose locations are listed in a file passed as an argument to this script
 
-#### USER-CONFIGURABLE VARIABLE####
-# The user must specify the path to the pedr2tab binary
-pedr2tab_bin=/home/dpmayer/bin
 ##################################
 
-echo $pedr2tab_bin
-
 date
-
-echo "EXPERIMENTAL CODE"
-sleep 1
 
 # Just a simple function to print a usage message
 print_usage (){
 echo ""
 echo "Usage: $0 <pedr_list.lis>"
 echo " Where <pedr_list.lis> is a file containing a list of the MOLA PEDR binary files to search through, including absolute path."
-echo " <pedr_list.lis> should should be specified using the absolute path to its location."
+echo " <pedr_list.lis> itself should should be specified using the absolute path to its location."
 echo "  This file is required by pedr2tab."
 echo ""
 }
@@ -50,17 +42,17 @@ fi
 # store the first argument in a variable called $pedr_list
 pedr_list=$1
 
-    # Quick test to see if the file  $pedr_list exists
-    if [ ! -e "$pedr_list" ]; then
+    # Quick test to see if the file $pedr_list exists and is a regular file
+    if [ ! -f "$pedr_list" ]; then
 	echo "$1 not found"
 	print_usage
 	exit 1
     fi
 
     # Test that pedr2tab exists and is executable
-    if [ ! -x "${pedr2tab_bin}/pedr2tab" ]; then
-	echo "${pedr2tab_bin}/pedr2tab not found or is not executable" 1>&2
-        echo "Make sure you have set the pedr2tab_bin variable correctly inside this script" 1>&2
+    if [ ! -x "$(which pedr2tab)" ]; then
+	echo "pedr2tab not found in PATH or is not executable" 1>&2
+        echo "Make sure you have added pedr2tab to your PATH variable" 1>&2
         echo " and that the file is executable." 1>&2
 	print_usage
 	exit 1
@@ -75,7 +67,7 @@ pedr_list=$1
 
     # If the input file exists, check that ISIS has been initialized by looking for pds2isis,
     #  if not, initialize it
-    if [[ `which pds2isis` = "" ]]; then
+    if [[ $(which pds2isis) = "" ]]; then
         echo "Initializing ISIS3"
         source $ISISROOT/scripts/isis3Startup.sh
 	# Force the ISIS binary dir to the front of $PATH to work around possible collision with `getkey` on some systems
@@ -83,7 +75,7 @@ pedr_list=$1
     fi
     # Quick test to make sure that initialization worked
     # If not, print an error and exit
-    if [[ `which pds2isis` = "" ]]; then
+    if [[ $(which pds2isis) = "" ]]; then
         echo "ERROR: Failed to initialize ISIS3"
         exit 1
     fi
@@ -114,7 +106,7 @@ parallel_pedr_bin4pc_align (){
 # Build a PEDR2TAB.PRM file for pedr2tab
 ##########################################################
 
-## Here's a comment block showing what the PEDR2TAB.PRM file should look line
+## Template used to build the PEDR2TAB.PRM file:
 echo "T # lhdr
 T # 0: shot longitude, latitude, topo, range, planetary_radius,ichan,aflag
 F # 1: MGS_longitude, MGS_latitude, MGS_radius
@@ -139,7 +131,7 @@ $maxlat    # ground_latitude_max
 ##########################################################
     
 # run pedr2tab and send STDOUT to a log file (so we don't clutter up the terminal)
-${pedr2tab_bin}/pedr2tab $pedr_list > ${3}_pedr2tab.log
+pedr2tab $pedr_list > ${3}_pedr2tab.log
 
 ## Now for some housekeeping!
 # "pedr2tab" is a misnomer because the output is actually formatted as space-delimited, fixed-length columns
@@ -171,6 +163,6 @@ proj $projstr $inputTAB | sed 's/\t/,/g' | awk -F, '{print($5","$4","$3","$1","$
 export -f parallel_pedr_bin4pc_align
 
 # Call the function
-awk -v pedrlist=$pedr_list -v pedr2tabbin=$pedr2tab_bin '{print($0" "pedrlist" "pedr2tabbin)}' stereopairs.lis | parallel --joblog parallel_pedr_bin4pc_align.log --colsep ' ' parallel_pedr_bin4pc_align
+awk -v pedrlist=$pedr_list '{print($0" "pedrlist")}' stereopairs.lis | parallel --joblog parallel_pedr_bin4pc_align.log --colsep ' ' parallel_pedr_bin4pc_align
 
 date

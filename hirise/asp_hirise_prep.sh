@@ -70,20 +70,18 @@ fi
 
 # If we've made it this far, commandline args look sane and specified files exist
 
-# Check that ISIS has been initialized already
     # Check that ISIS has been initialized by looking for pds2isis,
     #  if not, initialize it
-    if [[ `which pds2isis` = "" ]]; then
+    if [[ $(which pds2isis) = "" ]]; then
         echo "Initializing ISIS3"
         source $ISISROOT/scripts/isis3Startup.sh
-      # Quick test to make sure that initialization worked
-      # If not, print an error and exit
-       if [[ `which pds2isis` = "" ]]; then
-           echo "ERROR: Failed to initialize ISIS3" >&2
+    # Quick test to make sure that initialization worked
+    # If not, print an error and exit
+       if [[ $(which pds2isis) = "" ]]; then
+           echo "ERROR: Failed to initialize ISIS3" 1>&2
            exit 1
        fi
     fi
-
 ####
 
 date
@@ -116,7 +114,7 @@ cd ../
 export -f parallel_hiedr2mosaic
 # Run hiedr2mosaic.py by using GNU parallel to call parallel_hiedr2mosaic
 echo "Running hiedr2mosaic.py using GNU Parallel"
-cat $prods | parallel --joblog parallel_hiedr2mosaic.log parallel_hiedr2mosaic
+parallel --joblog parallel_hiedr2mosaic.log parallel_hiedr2mosaic :::: $prods
 echo "Finished hiedr2mosaic.py"
 date
 
@@ -134,7 +132,7 @@ cam2map4stereo.py ${1}_RED.mos_hijitreged.norm.cub ${2}_RED.mos_hijitreged.norm.
 }
 export -f parallel_cam2map4stereo
 echo "Running cam2map4stereo.py using GNU Parallel"
-cat stereopairs.lis | parallel --joblog parallel_cam2map4stereo.log --colsep ' ' parallel_cam2map4stereo
+parallel --joblog parallel_cam2map4stereo.log --colsep ' ' parallel_cam2map4stereo :::: stereopairs.lis
 echo "Done projecting images"
 
 echo "All done."

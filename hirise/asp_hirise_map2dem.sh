@@ -81,16 +81,15 @@ fi
 
 # If we've made it this far, commandline args look sane and specified files exist
 
-# Check that ISIS has been initialized already
     # Check that ISIS has been initialized by looking for pds2isis,
     #  if not, initialize it
-    if [[ `which pds2isis` = "" ]]; then
+    if [[ $(which pds2isis) = "" ]]; then
         echo "Initializing ISIS3"
         source $ISISROOT/scripts/isis3Startup.sh
-      # Quick test to make sure that initialization worked
-      # If not, print an error and exit
-       if [[ `which pds2isis` = "" ]]; then
-           echo "ERROR: Failed to initialize ISIS3" >&2
+    # Quick test to make sure that initialization worked
+    # If not, print an error and exit
+       if [[ $(which pds2isis) = "" ]]; then
+           echo "ERROR: Failed to initialize ISIS3" 1>&2
            exit 1
        fi
     fi
@@ -123,7 +122,7 @@ scontrol show hostname $SLURM_NODELIST | tr ' ' '\n' > nodelist.lis
 ##  Run ALL stereo in series for each stereopair using `parallel_stereo`
 # This is not the most resource efficient way of doing this but it's a hell of a lot more efficient compared to using plain `stereo` in series
 for i in $( cat stereodirs.lis ); do
-    echo "Begin parallel_stereo on "$i" at "`date`
+    echo "Begin parallel_stereo on "$i" at "$(date)
     cd $i
     # Note that we specify ../nodelist.lis as the file containing the list of hostnames for `parallel_stereo` to use
     # You may wish to edit out the --nodes-list argument if running this script in a non-SLURM environment
@@ -140,18 +139,18 @@ for i in $( cat stereodirs.lis ); do
     awk -v i=$i -v s="$config" '{print("parallel_stereo --nodes-list=../nodelist.lis --entry-point 4 "$1"_RED.map.cub "$2"_RED.map.cub -s "s" results/"i)}' stereopair.lis | sh 
     
     cd ../
-    echo "Finished parallel_stereo on "$i" at "`date`
+    echo "Finished parallel_stereo on "$i" at "$(date)
 done
 
 ## Transform point clouds to DEMs using `point2dem`. DEMs will have same map projection as parent images.
 for i in $( cat stereodirs.lis ); do
     cd $i/results
     # extract the proj4 string from one of the map-projected image cubes and store it in a variable (we'll need it later for point2dem)
-     proj=`awk 'NR==1 {print("gdalsrsinfo -o proj4 ../"$1"_RED.map.cub")}' ../stereopair.lis | sh | sed 's/'\''//g'`
-    echo "Begin point2dem on "$i" at "`date`
+     proj=$(awk 'NR==1 {print("gdalsrsinfo -o proj4 ../"$1"_RED.map.cub")}' ../stereopair.lis | sh | sed 's/'\''//g')
+    echo "Begin point2dem on "$i" at "$(date)
     echo point2dem --t_srs \"${proj}\" -r mars --nodata -32767 -s 2 -n --errorimage $i-PC.tif --orthoimage $i-L.tif -o dem/$i | sh
     cd ../../
-    echo "Finished point2dem on "$i" at "`date`
+    echo "Finished point2dem on "$i" at "$(date)
 done
 echo "All done."
 date

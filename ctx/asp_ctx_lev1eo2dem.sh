@@ -79,17 +79,15 @@ fi
 
 # If we've made it this far, commandline args look sane and specified files exist
 
-# Check that ISIS has been initialized already
-
     # Check that ISIS has been initialized by looking for pds2isis,
     #  if not, initialize it
-    if [[ `which pds2isis` = "" ]]; then
+    if [[ $(which pds2isis) = "" ]]; then
         echo "Initializing ISIS3"
         source $ISISROOT/scripts/isis3Startup.sh
-      # Quick test to make sure that initialization worked
-      # If not, print an error and exit
-       if [[ `which pds2isis` = "" ]]; then
-           echo "ERROR: Failed to initialize ISIS3"
+    # Quick test to make sure that initialization worked
+    # If not, print an error and exit
+       if [[ $(which pds2isis) = "" ]]; then
+           echo "ERROR: Failed to initialize ISIS3" 1>&2
            exit 1
        fi
     fi

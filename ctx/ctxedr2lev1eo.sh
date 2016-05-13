@@ -36,24 +36,22 @@ else
 fi
     # Check that files corresponding to the ProductIDs in productIDs.lis exist and are of non-zero size
     #   If a product is missing or empty, throw a warning, but continue to execute the script
-    prodarr=(`cat $p`)
+    prodarr=($(cat $p))
     for i in "${prodarr[@]}"; do
-	if [ -s `echo $i.img` ] || [ -s `echo $i.IMG` ]; then
-	 echo $i > /dev/null
-	else
-	  echo "Warning: "$i" EDR is Missing or Empty"  
+	if [[! -s $i.img ]] || [[! -s $i.IMG ]]; then
+	  echo "Warning: "$i" EDR is Missing or Empty" 1>&2  
 	fi
     done
 
     # Check that ISIS has been initialized by looking for pds2isis,
     #  if not, initialize it
-    if [[ `which pds2isis` = "" ]]; then
+    if [[ $(which pds2isis) = "" ]]; then
         echo "Initializing ISIS3"
         source $ISISROOT/scripts/isis3Startup.sh
-      # Quick test to make sure that initialization worked
-      # If not, print an error and exit
-       if [[ `which pds2isis` = "" ]]; then
-           echo "ERROR: Failed to initialize ISIS3"
+    # Quick test to make sure that initialization worked
+    # If not, print an error and exit
+       if [[ $(which pds2isis) = "" ]]; then
+           echo "ERROR: Failed to initialize ISIS3" 1>&2
            exit 1
        fi
     fi

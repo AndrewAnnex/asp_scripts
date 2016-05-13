@@ -70,15 +70,16 @@ pedr_list=$1
     if [[ $(which pds2isis) = "" ]]; then
         echo "Initializing ISIS3"
         source $ISISROOT/scripts/isis3Startup.sh
-	# Force the ISIS binary dir to the front of $PATH to work around possible collision with `getkey` on some systems
-	PATH=$ISISROOT/bin:$PATH
-    fi
     # Quick test to make sure that initialization worked
     # If not, print an error and exit
-    if [[ $(which pds2isis) = "" ]]; then
-        echo "ERROR: Failed to initialize ISIS3"
-        exit 1
+       if [[ $(which pds2isis) = "" ]]; then
+           echo "ERROR: Failed to initialize ISIS3" 1>&2
+           exit 1
+       fi
     fi
+    # Force the ISIS binary dir to the front of $PATH
+    # This works around possible name collision with `getkey` on some systems
+	PATH=$ISISROOT/bin:$PATH
 
 
 # Define a function that can be used by GNU Parallel

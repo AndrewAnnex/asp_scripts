@@ -104,7 +104,8 @@ for i in $( cat ${dirs} ); do
    cd ./dem_align
   echo point2dem --threads 16 --t_srs \"${proj}\" -r mars --nodata -32767 -s 1 ${i}_align-trans_reference.tif --orthoimage -n --errorimage ../$i-L.tif -o ${i}_align_1 | sh
   echo point2dem --threads 16 --t_srs \"${proj}\" -r mars --nodata -32767 -s 0.25 ${i}_align-trans_reference.tif --orthoimage ../$i-L.tif -o ${i}_align_025 --no-dem | sh
- dem_geoid ${i}_align_1-DEM.tif -o ${i}_align_1-DEM
+  # Convert datum elevations to areoid elevations (this makes the elevations directly comparable to MOLA terrain products)
+  dem_geoid ${i}_align_1-DEM.tif -o ${i}_align_1-DEM
  # Create hillshade for 1 m/px DEM
     echo "Generating hillshade with gdaldem"
     gdaldem hillshade ${i}_align_1-DEM.tif ${i}_align_1-hillshade.tif

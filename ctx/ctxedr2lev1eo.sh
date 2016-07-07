@@ -38,7 +38,7 @@ fi
     #   If a product is missing or empty, throw a warning, but continue to execute the script
     prodarr=($(cat $p))
     for i in "${prodarr[@]}"; do
-	if [[! -s $i.img ]] || [[! -s $i.IMG ]]; then
+	if [[ ! -s $i.img ]] || [[ ! -s $i.IMG ]]; then
 	  echo "Warning: "$i" EDR is Missing or Empty" 1>&2  
 	fi
     done

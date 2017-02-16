@@ -23,7 +23,7 @@ date
 # Just a simple function to print a usage message
 print_usage (){
 echo ""
-echo "Usage: $0 <pedr_list.lis>"
+echo "Usage: $(basename $0) <pedr_list.lis>"
 echo " Where <pedr_list.lis> is a file containing a list of the MOLA PEDR binary files to search through, including absolute path."
 echo " <pedr_list.lis> itself should should be specified using the absolute path to its location."
 echo "  This file is required by pedr2tab."

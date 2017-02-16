@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Summary:
-# This script runs pc_align using a CSV of MOLA shots as a reference and then creates DEMs at 18 m/px and orthoimages at 18 m/px and 6 m/px
+# This script runs pc_align using a CSV of MOLA shots as a reference and then creates DEMs at 24 m/px and orthoimages at 24 m/px and 6 m/px
 
 # Input: text file containing list of the root directories for each stereopair
 # Output will be sent to <stereopair root dir>/results/dem_align
@@ -16,7 +16,7 @@
 # Just a simple function to print a usage message
 print_usage (){
 echo ""
-echo "Usage: asp_ctx_map_ba_pc_align2dem.sh -d <stereodirs.lis> -m <max-displacement>"
+echo "Usage: $(basename $0) -d <stereodirs.lis> -m <max-displacement>"
 echo " Where <stereodirs.lis> is a file containing the name of the subdirectories to loop over, 1 per line"
 echo " and <max-displacement> is the maximum displacement to pass to pc_align (type pc_align --help for details)"
 echo "  Subdirectories containing stereopairs must all exist within the same root directory"
@@ -94,15 +94,15 @@ for i in $( cat ${dirs} ); do
     
     # move down into the directory with the pc_align output, which should be called "dem_align"
     cd ./dem_align
-    # Create 18 m/px DEM, ortho, normalized DEM, errorimage, no hole filling
-    echo point2dem --threads 16 --t_srs \"${proj}\" -r mars --nodata -32767 -s 18 ${i}_map_ba_align-trans_reference.tif --orthoimage -n --errorimage ../${i}_map_ba-L.tif -o ${i}_map_ba_align_18 | sh
+    # Create 24 m/px DEM, ortho, normalized DEM, errorimage, no hole filling
+    echo point2dem --threads 16 --t_srs \"${proj}\" -r mars --nodata -32767 -s 24 ${i}_map_ba_align-trans_reference.tif --orthoimage -n --errorimage ../${i}_map_ba-L.tif -o ${i}_map_ba_align_24 | sh
     
-    # Run dem_geoid on the align'd 18 m/px DEM so that the elevation values are comparable to MOLA products
-    echo dem_geoid --threads 16 ${i}_map_ba_align_18-DEM.tif -o ${i}_map_ba_align_18-DEM | sh
+    # Run dem_geoid on the align'd 24 m/px DEM so that the elevation values are comparable to MOLA products
+    echo dem_geoid --threads 16 ${i}_map_ba_align_24-DEM.tif -o ${i}_map_ba_align_24-DEM | sh
     
-    # Create hillshade for 18 m/px DEM
+    # Create hillshade for 24 m/px DEM
     echo "Generating hillshade with gdaldem"
-    gdaldem hillshade ${i}_map_ba_align_18-DEM.tif ${i}_map_ba_align_18-hillshade.tif
+    gdaldem hillshade ${i}_map_ba_align_24-DEM.tif ${i}_map_ba_align_24-hillshade.tif
     
     # Create 6 m/px ortho, no hole-filling, no DEM
     echo point2dem --threads 16 --t_srs \"${proj}\" -r mars --nodata -32767 -s 6 ${i}_map_ba_align-trans_reference.tif --orthoimage ../${i}_map_ba-L.tif -o ${i}_map_ba_align_6 --no-dem | sh

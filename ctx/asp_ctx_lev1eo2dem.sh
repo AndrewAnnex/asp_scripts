@@ -4,7 +4,7 @@
 # Script to take Level 1eo CTX stereopairs, run them through NASA Ames stereo Pipeline.
 # The script uses ASP's bundle_adjust tool to perform bundle adjustment on each stereopair separately.
 # The script also runs ASP's cam2map4stereo.py on the input cubes, but the resulting map-projected cubes are only used as a convenient source of ideal projection information;
-#  they're not actually used for stereo matching.  (This is a legacy of a much erlier version of the code and now is merely a lazy workaround for generating sensible map projection
+#  they're not actually used for stereo matching.  (This is a legacy of a much earlier version of the code and now is merely a lazy workaround for generating sensible map projection
 #  information that is used later. This should really be done with a few calls to ISIS3's `camrange`. )
 # This script is capable of processing many stereopairs in a single run and uses GNU parallel
 #  to improve the efficiency of the processing and reduce total wall time.  
@@ -23,7 +23,7 @@
 # Just a simple function to print a usage message
 print_usage (){
 echo ""
-echo "Usage: $0 -s <stereo.default> -p <productIDs.lis>"
+echo "Usage: $(basename $0) -s <stereo.default> -p <productIDs.lis>"
 echo " Where <productIDs.lis> is a file containing a list of the IDs of the CTX products to be processed."
 echo " Product IDs belonging to a stereopair must be listed sequentially."
 echo " The script will search for CTX Level 1eo products in the current directory before processing with ASP."
@@ -109,7 +109,7 @@ awk '{printf "%s ", $0}!(NR % 2){printf "\n"}' $prods | sed 's/ /_/g' | awk -F_ 
 awk '{print($3)}' stereopairs.lis > stereodirs.lis
 
 # Make directories named according to the lines in stereodirs.lis
-awk '{print("mkdir "$1)}' stereodirs.lis | sh
+mkdir $(cat stereodirs.lis )
 
 # Now extract each line from stereopairs.lis (created above) and write it to a textfile inside the corresponding subdirectory we created on the previous line
 # These files are used to ensure that the input images are specified in the same order during every step of `stereo` in ASP
@@ -124,9 +124,26 @@ awk '{print $1" "$2 >$3"/stereopair.lis"}' stereopairs.lis
 ###################################################################################
 
 # TODO: Test that the Level1eo cubes exist before trying to move them, throw error and exit if they don't exist
+#prodarr=($(awk '{print $1".lev1eo.cub"}' ${prods} ))
+
+# for (( <EXPR1> ; <EXPR2> ; <EXPR3> )); do
+#   <LIST>
+# done
+# ((n_elements=${#prodarr[@]}, max_index=n_elements - 2))
+# for (( j=0 ; j <= max_index ; j+=2 )); do
+#     if [ -e ${prodarr[$j]}.lev1eo.cub ] && [ -e ${prodarr[$j+1]}.lev1eo.cub  ]; then
+	
+#     else
+	
+#     fi
+
+# done
+
+
+
 # Move the Level 1eo cubes into the directory named for the stereopair they belong to
-awk '{print("mv "$1"*.lev1eo.cub "$3)}' stereopairs.lis | sh
-awk '{print("mv "$2"*.lev1eo.cub "$3)}' stereopairs.lis | sh
+awk '{print("mv "$1".lev1eo.cub "$3)}' stereopairs.lis | sh
+awk '{print("mv "$2".lev1eo.cub "$3)}' stereopairs.lis | sh
 
 # If this script is run as part of a job on a computing cluster using SLURM, we write the nodelist to a file named "nodelist.lis" so parallel_stereo can use it
 # This line is NOT portable to environments that are NOT running SLURM
@@ -144,7 +161,7 @@ cam2map4stereo.py $1.lev1eo.cub $2.lev1eo.cub
 # export the function so GNU parallel can use it
 export -f cam2map4stereo
 # Run the function using parallel
-cat stereopairs.lis | parallel --colsep ' ' --joblog parallel_cam2map4stereo.log cam2map4stereo 
+parallel --colsep ' ' --joblog parallel_cam2map4stereo.log cam2map4stereo :::: stereopairs.lis 
 
 
 ##  Run ALL stereo in series for each stereopair using `parallel_stereo`
@@ -186,30 +203,30 @@ for i in $( cat stereodirs.lis ); do
 done
 
 
-# loop through the directories listed in stereodirs.lis and run point2dem, image footprint and hillshade generation
-for i in $( cat stereodirs.lis ); do
-    # cd into the directory containing the stereopair i
-    cd $i
+# # loop through the directories listed in stereodirs.lis and run point2dem, image footprint and hillshade generation
+# for i in $( cat stereodirs.lis ); do
+#     # cd into the directory containing the stereopair i
+#     cd $i
     
-    # extract the proj4 string from one of the map-projected image cubes and store it in a variable (we'll need it later for point2dem)
-    proj=$(awk '{print("gdalsrsinfo -o proj4 "$1".map.cub")}' stereopair.lis | sh | sed 's/'\''//g')
+#     # extract the proj4 string from one of the map-projected image cubes and store it in a variable (we'll need it later for point2dem)
+#     proj=$(awk '{print("gdalsrsinfo -o proj4 "$1".map.cub")}' stereopair.lis | sh | sed 's/'\''//g')
     
-    # cd into the results directory for stereopair $i
-    cd results_ba/	       
-    # run point2dem with orthoimage and intersection error image outputs. no hole filling
-    echo point2dem --threads 16 --t_srs \"${proj}\" -r mars --nodata -32767 -s 18 -n --errorimage ${i}_ba-PC.tif --orthoimage ${i}_ba-L.tif -o dem/${i}_ba | sh
+#     # cd into the results directory for stereopair $i
+#     cd results_ba/	       
+#     # run point2dem with orthoimage and intersection error image outputs. no hole filling
+#     echo point2dem --threads 16 --t_srs \"${proj}\" -r mars --nodata -32767 -s 18 -n --errorimage ${i}_ba-PC.tif --orthoimage ${i}_ba-L.tif -o dem/${i}_ba | sh
 
-    # Generate hillshade (useful for getting feel for textural quality of the DEM)
-    gdaldem hillshade ./dem/${i}_ba-DEM.tif ./dem/${i}_ba-hillshade.tif
+#     # Generate hillshade (useful for getting feel for textural quality of the DEM)
+#     gdaldem hillshade ./dem/${i}_ba-DEM.tif ./dem/${i}_ba-hillshade.tif
     
-    ## OPTIONAL ##
-    # # Create a shapefile containing the footprint of the valid data area of the DEM 
-    # # This requires the `gdal_trace_outline` tool from the "Dan's GDAL Scripts" collection
-    # # If you don't have this tool installed and don't comment out the next line, the script will throw an error but will continue to execute
-    # gdal_trace_outline dem/${i}_ba-DEM.tif -ndv -32767 -erosion -out-cs en -ogr-out dem/${i}_ba_footprint.shp
+#     ## OPTIONAL ##
+#     # # Create a shapefile containing the footprint of the valid data area of the DEM 
+#     # # This requires the `gdal_trace_outline` tool from the "Dan's GDAL Scripts" collection
+#     # # If you don't have this tool installed and don't comment out the next line, the script will throw an error but will continue to execute
+#     # gdal_trace_outline dem/${i}_ba-DEM.tif -ndv -32767 -erosion -out-cs en -ogr-out dem/${i}_ba_footprint.shp
     
 
-    cd ../../
-done
+#     cd ../../
+# done
 
 date

@@ -23,7 +23,7 @@
 # Just a simple function to print a usage message
 print_usage (){
 echo ""
-echo "Usage: $0 -s <stereo.default> -p <productIDs.lis>"
+echo "Usage: $(basename $0) -s <stereo.default> -p <productIDs.lis>"
 echo " Where <productIDs.lis> is a file containing a list of the IDs of the CTX products to be processed."
 echo " Product IDs belonging to a stereopair must be listed sequentially."
 # echo " The script will search for CTX Level 1eo products in the current directory before processing with ASP."
@@ -153,11 +153,12 @@ for i in $( cat stereodirs.lis ); do
 # Store the complete path to the DEM we will use as the basis of the map projection step in a variable called $refdem
 refdem=${PWD}/results_ba/dem/${i}_ba_100_fill50-DEM.tif
 
-# If the specified DEM does not exist or does not have nonzero size, throw an error and exit.
+# If the specified DEM does not exist or does not have nonzero size, throw an error and immediately continue to the next iteration of the FOR loop.
 if [ ! -s "$refdem" ]; then
     echo "The specified DEM does not exist or has zero size"
     echo $refdem
-    exit 1
+    cd ../
+    continue
 fi
 
     # Store the names of the Level1 EO cubes in variables

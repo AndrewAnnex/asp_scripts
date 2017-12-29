@@ -101,7 +101,7 @@ for i in $( cat ${dirs} ); do
     mkdir -p logs
 
     # Create 18 m/px DEM, ortho, normalized DEM, errorimage, no hole filling
-    point2dem --threads 16 --t_srs "${proj}" -r mars --nodata -32767 -s 18 ${i}_map_ba_align-trans_reference.tif --orthoimage -n --errorimage ../${i}_map_ba-L.tif -o ${i}_map_ba_align_18
+    point2dem --threads 16 --t_srs "${proj}" -r mars --nodata -32767 -s 24 ${i}_map_ba_align-trans_reference.tif --orthoimage -n --errorimage ../${i}_map_ba-L.tif -o ${i}_map_ba_align_18
     if [ $? -ne 0 ]
     then
         echo "Failure running point2dem at 18m/p for $i at $(date)"

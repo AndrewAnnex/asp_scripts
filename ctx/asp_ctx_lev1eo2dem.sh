@@ -234,7 +234,7 @@ for i in $( cat stereodirs.lis ); do
     # cd into the results directory for stereopair $i
     cd results_ba/ || exit 1
     # run point2dem with orthoimage and intersection error image outputs. no hole filling
-    point2dem --threads 16 --t_srs "${proj}" -r mars --nodata -32767 -s 18 -n --errorimage ${i}_ba-PC.tif --orthoimage ${i}_ba-L.tif -o dem/${i}_ba
+    point2dem --threads 16 --t_srs "${proj}" -r mars --nodata -32767 -s 24 -n --errorimage ${i}_ba-PC.tif --orthoimage ${i}_ba-L.tif -o dem/${i}_ba
     if [ $? -ne 0 ]
     then
         echo "Failure running point2dem at 18m/p for $i at $(date)"
